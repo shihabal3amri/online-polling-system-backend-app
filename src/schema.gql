@@ -1,0 +1,148 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthenticationPayload {
+  accessToken: String!
+  refreshToken: String!
+}
+
+input CreateOptionInput {
+  text: String!
+}
+
+input CreatePollInput {
+  isMultipleOptions: Boolean!
+  options: [CreateOptionInput!]!
+  title: String!
+  willEndAt: String!
+}
+
+input CreateUserDto {
+  email: String!
+  password: String!
+  username: String!
+}
+
+input CreateVoteInput {
+  optionId: String!
+  pollId: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input LoginUserDto {
+  password: String!
+  username: String!
+}
+
+type Mutation {
+  createPoll(createPollInput: CreatePollInput!): Poll!
+  createVote(createVoteInput: CreateVoteInput!): Vote!
+  endPoll(id: String!): Poll!
+  login(loginUserDto: LoginUserDto!): AuthenticationPayload!
+  refresh(refreshToken: String!): AuthenticationPayload!
+  signup(createUserDto: CreateUserDto!): User!
+  updateVote(updateVoteInput: UpdateVoteInput!): Vote!
+}
+
+type Option {
+  _count: OptionCount!
+  id: ID!
+  poll: Poll!
+  pollId: String!
+  text: String!
+  timestamp: DateTime!
+  updatedAt: DateTime!
+  votes: [Vote!]
+}
+
+type OptionCount {
+  votes: Int!
+}
+
+input PaginationInput {
+  skip: Float! = 0
+  take: Float! = 50
+}
+
+type Poll {
+  _count: PollCount!
+  id: ID!
+  isMultipleOptions: Boolean!
+  isPollEndedByUser: Boolean!
+  options: [Option!]
+  timestamp: DateTime!
+  title: String!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+  votes: [Vote!]
+  willEndAt: DateTime!
+}
+
+type PollCount {
+  options: Int!
+  votes: Int!
+}
+
+type Query {
+  getPoll(id: String!): Poll!
+  getPolls(paginationInput: PaginationInput!): [Poll!]!
+  hello: String!
+}
+
+type RefreshToken {
+  archivedAt: DateTime
+  id: ID!
+  isArchived: Boolean!
+  timestamp: DateTime!
+  token: String!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+type Subscription {
+  pollUpdated(pollIds: [String!]!): Poll!
+}
+
+input UpdateVoteInput {
+  isVoted: Boolean!
+  voteId: String!
+}
+
+type User {
+  _count: UserCount!
+  email: String!
+  id: ID!
+  password: String!
+  polls: [Poll!]
+  refreshTokens: [RefreshToken!]
+  timestamp: DateTime!
+  updatedAt: DateTime!
+  username: String!
+  votes: [Vote!]
+}
+
+type UserCount {
+  polls: Int!
+  refreshTokens: Int!
+  votes: Int!
+}
+
+type Vote {
+  id: ID!
+  isVoted: Boolean!
+  option: Option!
+  optionId: String!
+  poll: Poll!
+  pollId: String!
+  timestamp: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}

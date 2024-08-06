@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator nestgraphql {
+  provider = "prisma-nestjs-graphql"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id              String           @id @default(uuid())
+  username        String           @unique
+  email           String           @unique
+  password        String
+  timestamp      DateTime @default(now()) @map("timestamp_at")
+  updatedAt      DateTime @default(now()) @map("updated_at") @updatedAt
+  refreshTokens   RefreshToken[]
+  votes           Vote[]
+  polls           Poll[]
+  @@map("user")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String  @unique
+
+  timestamp DateTime @default(now()) @map("timestamp_at")
+  updatedAt DateTime @default(now()) @map("updated_at") @updatedAt
+  isArchived Boolean  @default(false) @map("is_archived")
+  archivedAt DateTime? @map("archived_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("refresh_token")
+  @@index([timestamp], name: "idx_refresh_token_timestamp")
+  @@index([userId], name: "idx_refresh_token_userId")
+}
+
+model Poll {
+  id        String   @id @default(uuid())
+  title     String
+  options   Option[]
+  votes     Vote[]
+  userId    String   @map("user_id")
+  isPollEndedByUser Boolean @default(false) @map("is_poll_ended_by_user")
+  willEndAt DateTime @map("will_end_at")
+  isMultipleOptions Boolean @default(false) @map("is_multiple_options")
+  timestamp DateTime @default(now()) @map("timestamp_at")
+  updatedAt DateTime @default(now()) @map("updated_at") @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("poll")
+  @@index([userId], name: "idx_poll_userId")
+}
+
+model Option {
+  id        String   @id @default(uuid())
+  pollId    String   @map("poll_id")
+  text      String
+  votes     Vote[]
+  timestamp DateTime @default(now()) @map("timestamp_at")
+  updatedAt DateTime @default(now()) @map("updated_at") @updatedAt
+
+  poll Poll @relation(fields: [pollId], references: [id])
+
+  @@map("option")
+}
+
+model Vote {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  pollId    String   @map("poll_id")
+  optionId  String   @map("option_id")
+  timestamp DateTime @default(now()) @map("timestamp_at")
+  updatedAt DateTime @default(now()) @map("updated_at") @updatedAt
+  isVoted   Boolean  @default(true) @map("is_voted")
+
+  user   User   @relation(fields: [userId], references: [id])
+  poll   Poll   @relation(fields: [pollId], references: [id])
+  option Option @relation(fields: [optionId], references: [id])
+
+  @@map("vote")
+  @@index([timestamp], name: "idx_vote_timestamp")
+  @@index([userId], name: "idx_vote_userId")
+  @@index([pollId], name: "idx_vote_pollId")
+  @@index([optionId], name: "idx_vote_optionId")
+}
